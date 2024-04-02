@@ -1,0 +1,80 @@
+apiVersion: "kubeflow.org/v1"
+kind: "PyTorchJob"
+metadata:
+  name: "pytorch-dist-mnist-nccl-storage"
+spec:
+  pytorchReplicaSpecs:
+    Master:
+      replicas: 1
+      restartPolicy: OnFailure
+      template:
+        spec:
+          containers:
+            - name: pytorch
+              image: chuanli11/pytorch-ngc:1.2
+              args: ["--backend", "nccl", "--batch-size", "256"]
+              resources: 
+                limits:
+                  nvidia.com/gpu: 1
+                  rdma/rdma_shared_device_a: 1
+                requests:
+                  nvidia.com/gpu: 1
+                  rdma/rdma_shared_device_a: 1
+              command:
+                - "python"
+                - "/opt/mnist/src/mnist.py"
+              env:
+                - name: NCCL_DEBUG
+                  value: "INFO"
+                - name: NCCL_IB_PCI_RELAXED_ORDERING
+                  value: "0"
+                - name: NCCL_IB_DISABLE
+                  value: "0"
+              securityContext:
+                capabilities:
+                  add:
+                    - IPC_LOCK
+              volumeMounts:
+                - name: shared-storage
+                  mountPath: /opt/data
+          volumes:
+            - name: shared-storage
+              persistentVolumeClaim:
+                claimName: pvc-chuan
+    Worker:
+      replicas: 1
+      restartPolicy: OnFailure
+      template:
+        spec:
+          containers: 
+            - name: pytorch
+              image: chuanli11/pytorch-ngc:1.2
+              args: ["--backend", "nccl", "--batch-size", "256"]
+              resources: 
+                limits:
+                  nvidia.com/gpu: 1
+                  rdma/rdma_shared_device_a: 1
+                requests:
+                  nvidia.com/gpu: 1
+                  rdma/rdma_shared_device_a: 1
+              command:
+                - "python"
+                - "/opt/mnist/src/mnist.py"
+              env:
+                - name: NCCL_DEBUG
+                  value: "INFO"
+                - name: NCCL_IB_PCI_RELAXED_ORDERING
+                  value: "0"
+                - name: NCCL_IB_DISABLE
+                  value: "0"
+              securityContext:
+                capabilities:
+                  add:
+                    - IPC_LOCK
+              volumeMounts:
+                - name: shared-storage
+                  mountPath: /opt/data
+          volumes:
+            - name: shared-storage
+              persistentVolumeClaim:
+                claimName: pvc-chuan
