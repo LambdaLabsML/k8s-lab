@@ -1,0 +1,102 @@
+apiVersion: "kubeflow.org/v1"
+kind: "PyTorchJob"
+metadata:
+  name: "pytorch-job-resnet-imagenet"
+spec:
+  pytorchReplicaSpecs:
+    Master:
+      replicas: 1
+      restartPolicy: OnFailure
+      template:
+        spec:
+          containers:
+            - name: pytorch
+              image: chuanli11/pytorch-ngc:1.17
+              args: ["--backend", "nccl", "--batch-size", "256", "--epochs", "1", "--repeat", "1", "--num-workers", "32"]
+              # args: ["--backend", "nccl", "--batch-size", "256", "--epochs", "1", "--repeat", "1", "--num-workers", "32", "--use-syn", "--num-syn-batches", "100"]
+              resources: 
+                limits:
+                  nvidia.com/gpu: 1
+                  rdma/rdma_shared_device_a: 1
+                  memory: "128Gi"  
+                requests:
+                  nvidia.com/gpu: 1
+                  rdma/rdma_shared_device_a: 1
+                  memory: "128Gi"
+              command:
+                - "python"
+                - "/opt/workspace/src/benchmark_resnet_imagenet.py"
+              env:
+                - name: NCCL_DEBUG
+                  value: "INFO"
+                - name: NCCL_IB_PCI_RELAXED_ORDERING
+                  value: "0"
+                - name: NCCL_IB_DISABLE
+                  value: "0"
+                - name: NCCL_IB_HCA
+                  value: "mlx5_1,mlx5_2,mlx5_3,mlx5_4,mlx5_5,mlx5_6,mlx5_7,mlx5_8,mlx5_9,mlx5_10,mlx5_11"
+              securityContext:
+                capabilities:
+                  add:
+                    - IPC_LOCK
+              volumeMounts:
+                - name: shared-storage
+                  mountPath: /opt/data
+                - mountPath: /dev/shm
+                  name: dshm
+          volumes:
+            - name: shared-storage
+              persistentVolumeClaim:
+                claimName: pvc-chuan
+            - name: dshm
+              emptyDir:
+                medium: Memory
+                sizeLimit: "128Gi"
+    Worker:
+      replicas: 0
+      restartPolicy: OnFailure
+      template:
+        spec:
+          containers: 
+            - name: pytorch
+              image: chuanli11/pytorch-ngc:1.17
+              args: ["--backend", "nccl", "--batch-size", "256", "--epochs", "1", "--repeat", "1", "--num-workers", "32"]
+              # args: ["--backend", "nccl", "--batch-size", "256", "--epochs", "1", "--repeat", "1", "--num-workers", "32", "--use-syn", "--num-syn-batches", "100"]
+              resources: 
+                limits:
+                  nvidia.com/gpu: 1
+                  rdma/rdma_shared_device_a: 1
+                  memory: "128Gi"  
+                requests:
+                  nvidia.com/gpu: 1
+                  rdma/rdma_shared_device_a: 1
+                  memory: "128Gi"  
+              command:
+                - "python"
+                - "/opt/workspace/src/benchmark_resnet_imagenet.py"
+              env:
+                - name: NCCL_DEBUG
+                  value: "INFO"
+                - name: NCCL_IB_PCI_RELAXED_ORDERING
+                  value: "0"
+                - name: NCCL_IB_DISABLE
+                  value: "0"
+                - name: NCCL_IB_HCA
+                  value: "mlx5_1,mlx5_2,mlx5_3,mlx5_4,mlx5_5,mlx5_6,mlx5_7,mlx5_8,mlx5_9,mlx5_10,mlx5_11"
+              securityContext:
+                capabilities:
+                  add:
+                    - IPC_LOCK
+              volumeMounts:
+                - name: shared-storage
+                  mountPath: /opt/data
+                - mountPath: /dev/shm
+                  name: dshm
+          volumes:
+            - name: shared-storage
+              persistentVolumeClaim:
+                claimName: pvc-chuan
+            - name: dshm
+              emptyDir:
+                medium: Memory
+                sizeLimit: "128Gi"
