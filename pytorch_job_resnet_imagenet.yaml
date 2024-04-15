@@ -11,18 +11,20 @@ spec:
         spec:
           containers:
             - name: pytorch
-              image: chuanli11/pytorch-ngc:1.17
-              args: ["--backend", "nccl", "--batch-size", "256", "--epochs", "1", "--repeat", "1", "--num-workers", "32"]
-              # args: ["--backend", "nccl", "--batch-size", "256", "--epochs", "1", "--repeat", "1", "--num-workers", "32", "--use-syn", "--num-syn-batches", "100"]
+              image: chuanli11/pytorch-ngc:1.26
+              args: ["--backend", "nccl", "--batch-size", "256", "--epochs", "4", "--repeat", "1", "--num-workers", "2", "--pin-memory", "--persistent-workers", "--prefetch-factor", "2"]
+              # args: ["--backend", "nccl", "--batch-size", "256", "--epochs", "4", "--repeat", "1", "--num-workers", "2", "--use-syn", "--num-syn-batches", "100"]
               resources: 
                 limits:
                   nvidia.com/gpu: 1
                   rdma/rdma_shared_device_a: 1
-                  memory: "128Gi"  
+                  memory: "128Gi" 
+                  # cpu: 256
                 requests:
                   nvidia.com/gpu: 1
                   rdma/rdma_shared_device_a: 1
                   memory: "128Gi"
+                  # cpu: 256
               command:
                 - "python"
                 - "/opt/workspace/src/benchmark_resnet_imagenet.py"
@@ -47,30 +49,32 @@ spec:
           volumes:
             - name: shared-storage
               persistentVolumeClaim:
-                claimName: pvc-chuan
+                claimName: pvc-ml-ceph-filesystem
             - name: dshm
               emptyDir:
                 medium: Memory
                 sizeLimit: "128Gi"
     Worker:
-      replicas: 0
+      replicas: 15
       restartPolicy: OnFailure
       template:
         spec:
           containers: 
             - name: pytorch
-              image: chuanli11/pytorch-ngc:1.17
-              args: ["--backend", "nccl", "--batch-size", "256", "--epochs", "1", "--repeat", "1", "--num-workers", "32"]
-              # args: ["--backend", "nccl", "--batch-size", "256", "--epochs", "1", "--repeat", "1", "--num-workers", "32", "--use-syn", "--num-syn-batches", "100"]
+              image: chuanli11/pytorch-ngc:1.26
+              args: ["--backend", "nccl", "--batch-size", "256", "--epochs", "4", "--repeat", "1", "--num-workers", "2", "--pin-memory", "--persistent-workers", "--prefetch-factor", "2"]
+              # args: ["--backend", "nccl", "--batch-size", "256", "--epochs", "4", "--repeat", "1", "--num-workers", "2", "--use-syn", "--num-syn-batches", "100"]
               resources: 
                 limits:
                   nvidia.com/gpu: 1
                   rdma/rdma_shared_device_a: 1
                   memory: "128Gi"  
+                  # cpu: 4
                 requests:
                   nvidia.com/gpu: 1
                   rdma/rdma_shared_device_a: 1
-                  memory: "128Gi"  
+                  memory: "128Gi"
+                  # cpu: 4
               command:
                 - "python"
                 - "/opt/workspace/src/benchmark_resnet_imagenet.py"
@@ -95,7 +99,7 @@ spec:
           volumes:
             - name: shared-storage
               persistentVolumeClaim:
-                claimName: pvc-chuan
+                claimName: pvc-ml-ceph-filesystem
             - name: dshm
               emptyDir:
                 medium: Memory
