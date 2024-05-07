@@ -16,7 +16,7 @@ spec:
               effect: NoSchedule
           containers:
             - name: pytorch
-              image: chuanli11/pytorch-ngc:1.26
+              image: chuanli11/pytorch-ngc:1.28
               # args: ["-c", "while true; do sleep 3600; done"]
               args: ["--backend", "nccl", "--batch-size", "256", "--epochs", "4", "--repeat", "1", "--num-workers", "2", "--pin-memory", "--persistent-workers", "--prefetch-factor", "2"]
               # args: ["--backend", "nccl", "--batch-size", "256", "--epochs", "4", "--repeat", "1", "--num-workers", "2", "--use-syn", "--num-syn-batches", "100"]
@@ -43,7 +43,7 @@ spec:
                 - name: NCCL_IB_DISABLE
                   value: "0"
                 - name: NCCL_IB_HCA
-                  value: "mlx5_1,mlx5_2,mlx5_3,mlx5_4,mlx5_5,mlx5_6,mlx5_7,mlx5_8,mlx5_9,mlx5_10,mlx5_11"
+                  value: "mlx5_0,mlx5_1,mlx5_2,mlx5_5,mlx5_6,mlx5_7,mlx5_8,mlx5_13"
               securityContext:
                 capabilities:
                   add:
@@ -56,13 +56,13 @@ spec:
           volumes:
             - name: shared-storage
               persistentVolumeClaim:
-                claimName: pvc-ml-longhorn
+                claimName: pvc-ml-intelliflash
             - name: dshm
               emptyDir:
                 medium: Memory
                 sizeLimit: "128Gi"
     Worker:
-      replicas: 1
+      replicas: 15
       restartPolicy: OnFailure
       template:
         spec:
@@ -73,7 +73,7 @@ spec:
               effect: NoSchedule
           containers: 
             - name: pytorch
-              image: chuanli11/pytorch-ngc:1.26
+              image: chuanli11/pytorch-ngc:1.28
               # args: ["-c", "while true; do sleep 3600; done"]
               args: ["--backend", "nccl", "--batch-size", "256", "--epochs", "4", "--repeat", "1", "--num-workers", "2", "--pin-memory", "--persistent-workers", "--prefetch-factor", "2"]
               # args: ["--backend", "nccl", "--batch-size", "256", "--epochs", "4", "--repeat", "1", "--num-workers", "2", "--use-syn", "--num-syn-batches", "100"]
@@ -84,6 +84,7 @@ spec:
                   memory: "128Gi"  
                   # cpu: 4
                 requests:
+
                   nvidia.com/gpu: 1
                   rdma/rdma_shared_device_a: 1
                   memory: "128Gi"
@@ -100,7 +101,7 @@ spec:
                 - name: NCCL_IB_DISABLE
                   value: "0"
                 - name: NCCL_IB_HCA
-                  value: "mlx5_1,mlx5_2,mlx5_3,mlx5_4,mlx5_5,mlx5_6,mlx5_7,mlx5_8,mlx5_9,mlx5_10,mlx5_11"
+                  value: "mlx5_0,mlx5_1,mlx5_2,mlx5_5,mlx5_6,mlx5_7,mlx5_8,mlx5_13"
               securityContext:
                 capabilities:
                   add:
@@ -113,7 +114,7 @@ spec:
           volumes:
             - name: shared-storage
               persistentVolumeClaim:
-                claimName: pvc-ml-longhorn
+                claimName: pvc-ml-intelliflash
             - name: dshm
               emptyDir:
                 medium: Memory
