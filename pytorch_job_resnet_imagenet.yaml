@@ -9,9 +9,15 @@ spec:
       restartPolicy: OnFailure
       template:
         spec:
+          tolerations:
+            - key: nvidia.com/gpu
+              value: "true"
+              operator: Equal
+              effect: NoSchedule
           containers:
             - name: pytorch
               image: chuanli11/pytorch-ngc:1.26
+              # args: ["-c", "while true; do sleep 3600; done"]
               args: ["--backend", "nccl", "--batch-size", "256", "--epochs", "4", "--repeat", "1", "--num-workers", "2", "--pin-memory", "--persistent-workers", "--prefetch-factor", "2"]
               # args: ["--backend", "nccl", "--batch-size", "256", "--epochs", "4", "--repeat", "1", "--num-workers", "2", "--use-syn", "--num-syn-batches", "100"]
               resources: 
@@ -26,6 +32,7 @@ spec:
                   memory: "128Gi"
                   # cpu: 256
               command:
+                # - "/bin/bash"
                 - "python"
                 - "/opt/workspace/src/benchmark_resnet_imagenet.py"
               env:
@@ -49,19 +56,25 @@ spec:
           volumes:
             - name: shared-storage
               persistentVolumeClaim:
-                claimName: pvc-ml-ceph-filesystem
+                claimName: pvc-ml-longhorn
             - name: dshm
               emptyDir:
                 medium: Memory
                 sizeLimit: "128Gi"
     Worker:
-      replicas: 15
+      replicas: 1
       restartPolicy: OnFailure
       template:
         spec:
+          tolerations:
+            - key: nvidia.com/gpu
+              value: "true"
+              operator: Equal
+              effect: NoSchedule
           containers: 
             - name: pytorch
               image: chuanli11/pytorch-ngc:1.26
+              # args: ["-c", "while true; do sleep 3600; done"]
               args: ["--backend", "nccl", "--batch-size", "256", "--epochs", "4", "--repeat", "1", "--num-workers", "2", "--pin-memory", "--persistent-workers", "--prefetch-factor", "2"]
               # args: ["--backend", "nccl", "--batch-size", "256", "--epochs", "4", "--repeat", "1", "--num-workers", "2", "--use-syn", "--num-syn-batches", "100"]
               resources: 
@@ -76,6 +89,7 @@ spec:
                   memory: "128Gi"
                   # cpu: 4
               command:
+                # - "/bin/bash"
                 - "python"
                 - "/opt/workspace/src/benchmark_resnet_imagenet.py"
               env:
@@ -99,7 +113,7 @@ spec:
           volumes:
             - name: shared-storage
               persistentVolumeClaim:
-                claimName: pvc-ml-ceph-filesystem
+                claimName: pvc-ml-longhorn
             - name: dshm
               emptyDir:
                 medium: Memory
