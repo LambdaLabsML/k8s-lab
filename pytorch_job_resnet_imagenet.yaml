@@ -18,7 +18,7 @@ spec:
             - name: pytorch
               image: chuanli11/pytorch-ngc:1.28
               # args: ["-c", "while true; do sleep 3600; done"]
-              args: ["--backend", "nccl", "--batch-size", "256", "--epochs", "4", "--repeat", "1", "--num-workers", "2", "--pin-memory", "--persistent-workers", "--prefetch-factor", "2"]
+              args: ["--backend", "nccl", "--batch-size", "256", "--epochs", "4", "--repeat", "1", "--num-workers", "16", "--pin-memory", "--persistent-workers", "--prefetch-factor", "2"]
               # args: ["--backend", "nccl", "--batch-size", "256", "--epochs", "4", "--repeat", "1", "--num-workers", "2", "--use-syn", "--num-syn-batches", "100"]
               resources: 
                 limits:
@@ -30,7 +30,7 @@ spec:
                   nvidia.com/gpu: 1
                   rdma/rdma_shared_device_a: 1
                   memory: "128Gi"
-                  # cpu: 256
+                  cpu: 16
               command:
                 # - "/bin/bash"
                 - "python"
@@ -62,7 +62,7 @@ spec:
                 medium: Memory
                 sizeLimit: "128Gi"
     Worker:
-      replicas: 15
+      replicas: 63
       restartPolicy: OnFailure
       template:
         spec:
@@ -75,7 +75,7 @@ spec:
             - name: pytorch
               image: chuanli11/pytorch-ngc:1.28
               # args: ["-c", "while true; do sleep 3600; done"]
-              args: ["--backend", "nccl", "--batch-size", "256", "--epochs", "4", "--repeat", "1", "--num-workers", "2", "--pin-memory", "--persistent-workers", "--prefetch-factor", "2"]
+              args: ["--backend", "nccl", "--batch-size", "256", "--epochs", "4", "--repeat", "1", "--num-workers", "16", "--pin-memory", "--persistent-workers", "--prefetch-factor", "2"]
               # args: ["--backend", "nccl", "--batch-size", "256", "--epochs", "4", "--repeat", "1", "--num-workers", "2", "--use-syn", "--num-syn-batches", "100"]
               resources: 
                 limits:
@@ -84,11 +84,10 @@ spec:
                   memory: "128Gi"  
                   # cpu: 4
                 requests:
-
                   nvidia.com/gpu: 1
                   rdma/rdma_shared_device_a: 1
                   memory: "128Gi"
-                  # cpu: 4
+                  cpu: 16
               command:
                 # - "/bin/bash"
                 - "python"
