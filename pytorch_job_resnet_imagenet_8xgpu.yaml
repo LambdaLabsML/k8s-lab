@@ -24,13 +24,13 @@ spec:
                 limits:
                   nvidia.com/gpu: 8
                   rdma/rdma_shared_device_a: 1
-                  memory: "128Gi" 
+                  memory: "512Gi" 
                   # cpu: 256
                 requests:
                   nvidia.com/gpu: 8
                   rdma/rdma_shared_device_a: 1
-                  memory: "128Gi"
-                  cpu: 16
+                  memory: "512Gi"
+                  cpu: 128
               command:
                 # - "/bin/bash"
                 - "torchrun"
