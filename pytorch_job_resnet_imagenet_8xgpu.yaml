@@ -18,16 +18,16 @@ spec:
             - name: pytorch
               image: chuanli11/pytorch-ngc:1.29
               # args: ["-c", "while true; do sleep 3600; done"]
-              args: ["--backend", "nccl", "--batch-size", "256", "--epochs", "4", "--repeat", "1", "--num-workers", "8", "--pin-memory", "--persistent-workers", "--prefetch-factor", "2"]
+              args: ["--backend", "nccl", "--batch-size", "256", "--epochs", "4", "--repeat", "1", "--num-workers", "16", "--pin-memory", "--persistent-workers", "--prefetch-factor", "2"]
               # args: ["--backend", "nccl", "--batch-size", "256", "--epochs", "4", "--repeat", "1", "--num-workers", "2", "--use-syn", "--num-syn-batches", "100"]
               resources: 
                 limits:
-                  nvidia.com/gpu: 1
+                  nvidia.com/gpu: 8
                   rdma/rdma_shared_device_a: 1
                   memory: "128Gi" 
                   # cpu: 256
                 requests:
-                  nvidia.com/gpu: 1
+                  nvidia.com/gpu: 8
                   rdma/rdma_shared_device_a: 1
                   memory: "128Gi"
                   cpu: 16
@@ -36,7 +36,7 @@ spec:
                 - "torchrun"
                 - "--standalone"
                 - "--nnodes=1"
-                - "--nproc-per-node=1"
+                - "--nproc-per-node=8"
                 - "/opt/workspace/src/benchmark_resnet_imagenet_baremetal.py"
               env:
                 - name: NCCL_DEBUG
